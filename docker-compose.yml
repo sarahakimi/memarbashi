@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/memarbashi:latest
+    image: ghcr.io/sarahakimi/memarbashi:latest
     container_name: memarbashi
     restart: unless-stopped
     ports:
