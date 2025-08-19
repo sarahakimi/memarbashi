@@ -1,5 +1,6 @@
 'use client';
 import styled from 'styled-components';
+import type { Theme } from '@/theme';
 
 export const Container = styled.div`
   max-width: 1120px;
@@ -45,3 +46,8 @@ export const Button = styled.button`
   transition: transform 0.08s ease, box-shadow 0.2s ease;
   &:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,58,237,0.25); }
 `;
+
+declare module 'styled-components' {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface DefaultTheme extends Theme {}
+}

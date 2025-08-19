@@ -1,27 +1,16 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import StyledComponentsRegistry from "@/lib/styled-component";
-import {GlobalStyles} from "@/styles/global";
-
+import type { Metadata } from 'next';
+import Providers from '@/app/providers';
+import strings from "./strings.json"
 export const metadata: Metadata = {
-  title: 'Memarbashi',
+  title: strings.brand,
   description: 'Architecture & Design Studio',
 };
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode })
+{
   return (
-      <html lang="en">
-      <body>
-      <StyledComponentsRegistry>
-        <GlobalStyles />
-        {children}
-      </StyledComponentsRegistry>
-      </body>
-      </html>
-  );
+    <html lang="fa" dir="rtl">
+    <body>
+    <Providers>{children}</Providers>
+    </body>
+    </html>);
 }
-
