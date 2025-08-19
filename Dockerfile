@@ -2,15 +2,15 @@
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat git python3 make g++
 WORKDIR /app
-# use pnpm lockfile
 COPY package.json pnpm-lock.yaml ./
 ENV CI=true HUSKY=0
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@8.15.8 --activate
 RUN pnpm install --frozen-lockfile
 
 # ---- build ----
 FROM node:20-alpine AS builder
 WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@8.15.8 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm run build
