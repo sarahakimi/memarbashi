@@ -1,0 +1,9 @@
+services:
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/memarbashi:latest
+    container_name: memarbashi
+    restart: unless-stopped
+    ports:
+      - "3006:3000"  # host:container — avoid Grafana on 3000
+    environment:
+      - NODE_ENV=production
