@@ -1,9 +1,12 @@
 # ---- deps ----
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat git python3 make g++
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+# use pnpm lockfile
+COPY package.json pnpm-lock.yaml ./
+ENV CI=true HUSKY=0
+RUN corepack enable
+RUN pnpm install --frozen-lockfile
 
 # ---- build ----
 FROM node:20-alpine AS builder
@@ -16,13 +19,10 @@ RUN pnpm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
-
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
