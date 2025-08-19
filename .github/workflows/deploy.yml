@@ -33,33 +33,36 @@ jobs:
             "NPM_TOKEN=${{ secrets.NPM_TOKEN }}"
           provenance: false
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Copy docker-compose to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}   # root
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "docker-compose.yml"
-          target: "/opt/memarbashi"
+deploy:
+  needs: build-and-push
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4             # <-- THIS was missing
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}   # root
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script: |
-            set -e
-            mkdir -p /opt/memarbashi
-            cd /opt/memarbashi
-            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            docker compose down || true
-            docker compose pull
-            docker compose up -d
-            docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep memarbashi || true
+    - name: Copy docker-compose to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}   # root
+        password: ${{ secrets.SERVER_PASSWORD }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        source: "./docker-compose.yml"         # explicitly from repo root
+        target: "/opt/memarbashi"
+
+    - name: Deploy via SSH (compose pull & up)
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}   # root
+        password: ${{ secrets.SERVER_PASSWORD }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          set -e
+          mkdir -p /opt/memarbashi
+          cd /opt/memarbashi
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+          docker compose down || true
+          docker compose pull
+          docker compose up -d
+          docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep memarbashi || true
